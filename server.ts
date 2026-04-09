@@ -1,9 +1,10 @@
 import express from "express";
+import http from "http";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
-import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { runAiChat, normalizePromptForAiApi } from "./server/aiChat";
 
 dotenv.config();
 
@@ -12,42 +13,76 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "2mb" }));
 
-  // AI Chat Endpoint
-  app.post("/api/ai/chat", async (req, res) => {
-    const { message, mode, history } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return res.status(500).json({ error: "Gemini API key not configured" });
+  /** OpenStreetMap Nominatim (respect usage policy; low volume). */
+  app.get("/api/geocode", async (req, res) => {
+    const q = req.query.q;
+    if (!q || typeof q !== "string" || q.trim().length < 2) {
+      return res.status(400).json({ error: "Missing or short query" });
     }
-
     try {
-      const systemPrompt = mode === "health" 
-        ? "You are SheShark Health Assistant, a supportive AI for women's health and wellness. Provide empathetic, accurate, and helpful advice specifically for women. Always include a disclaimer that you are an AI and not a doctor."
-        : "You are SheShark Business Advisor, a strategic AI for women entrepreneurs in the clean energy sector. Provide professional, actionable business advice, market insights, and growth strategies.";
-
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [{ parts: [{ text: `${systemPrompt}\n\nUser: ${message}` }] }],
+      const url = new URL("https://nominatim.openstreetmap.org/search");
+      url.searchParams.set("q", q.trim());
+      url.searchParams.set("format", "json");
+      url.searchParams.set("limit", "1");
+      const r = await fetch(url.toString(), {
+        headers: {
+          "User-Agent": "SheSharkWeb/1.0 (+https://github.com/TheShakSpace/Sheshark-Web)",
+          Accept: "application/json",
+        },
       });
-      const text = response.text;
-
-      res.json({ text });
-    } catch (error) {
-      console.error("AI Error:", error);
-      res.status(500).json({ error: "Failed to generate AI response" });
+      if (!r.ok) {
+        return res.status(502).json({ error: "Geocoder unavailable" });
+      }
+      const data = (await r.json()) as { lat: string; lon: string; display_name: string }[];
+      if (!data?.length) {
+        return res.status(404).json({ error: "No results" });
+      }
+      const row = data[0];
+      res.json({
+        lat: parseFloat(row.lat),
+        lng: parseFloat(row.lon),
+        label: row.display_name,
+      });
+    } catch (e) {
+      console.error("[api/geocode]", e);
+      res.status(500).json({ error: "Geocode failed" });
     }
   });
 
-  // Vite middleware for development
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const body = req.body as { message?: string; mode?: string; history?: unknown };
+      const mode = body.mode === "health" ? "health" : "business";
+      const raw = typeof body.message === "string" ? body.message : "";
+      const normalized = normalizePromptForAiApi(raw, mode);
+
+      if (!normalized.trim()) {
+        const r = await runAiChat("hello", mode);
+        return res.json({ reply: r.reply, source: r.source, text: r.reply });
+      }
+
+      const result = await runAiChat(normalized, mode);
+      res.json({ reply: result.reply, source: result.source, text: result.reply });
+    } catch (e) {
+      console.error("[api/ai/chat]", e);
+      const mode = (req.body as { mode?: string })?.mode === "health" ? "health" : "business";
+      const fallback = await runAiChat("tip of the day", mode);
+      res.json({ reply: fallback.reply, source: "local", text: fallback.reply });
+    }
+  });
+
+  const server = http.createServer(app);
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: { server },
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);
@@ -59,8 +94,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`SheShark Server running on http://localhost:${PORT}`);
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`SheShark Web running on http://localhost:${PORT}`);
   });
 }
 

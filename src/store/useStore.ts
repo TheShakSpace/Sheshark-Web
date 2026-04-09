@@ -1,11 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type SheSharkRole = 'customer' | 'business' | null;
+
 interface User {
   uid: string;
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
+  role: SheSharkRole;
 }
 
 interface ChatMessage {
@@ -22,12 +25,13 @@ interface SheSharkState {
   clearCart: () => void;
   chats: Record<string, ChatMessage[]>;
   addChatMessage: (mode: string, message: ChatMessage) => void;
+  clearChatMessages: (mode: string) => void;
 }
 
 export const useStore = create<SheSharkState>()(
   persist(
     (set) => ({
-      user: null,
+      user: null as SheSharkState['user'],
       setUser: (user) => set({ user }),
       cart: [],
       addToCart: (item) => set((state) => ({ cart: [...state.cart, item] })),
@@ -40,6 +44,10 @@ export const useStore = create<SheSharkState>()(
           [mode]: [...(state.chats[mode] || []), message]
         }
       })),
+      clearChatMessages: (mode) =>
+        set((state) => ({
+          chats: { ...state.chats, [mode]: [] },
+        })),
     }),
     {
       name: 'sheshark-storage',

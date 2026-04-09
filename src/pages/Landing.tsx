@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Button, GlassCard } from '@/components/UI';
 import { 
@@ -18,21 +19,11 @@ import {
   PlayCircle,
   HelpCircle
 } from 'lucide-react';
-import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Landing = () => {
   const navigate = useNavigate();
-
-  const handleLogin = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { t } = useTranslation();
 
   return (
     <div className="relative overflow-hidden">
@@ -45,7 +36,7 @@ const Landing = () => {
               animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest mb-8 border border-primary/20"
             >
-              <Zap size={14} className="fill-current" /> Empowering Women in Clean Energy
+              <Zap size={14} className="fill-current" /> {t('landing.hero.badge')}
             </motion.div>
             
             <motion.h1 
@@ -54,8 +45,8 @@ const Landing = () => {
               transition={{ duration: 1, ease: "easeOut" }}
               className="hero-title text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[1.1] uppercase"
             >
-              The Future <br />
-              <span className="gradient-text">is Female</span>
+              {t('landing.hero.titleLine1')} <br />
+              <span className="gradient-text">{t('landing.hero.titleLine2')}</span>
             </motion.h1>
 
             <motion.p 
@@ -64,7 +55,7 @@ const Landing = () => {
               transition={{ delay: 0.2 }}
               className="text-lg md:text-2xl text-muted max-w-2xl mx-auto mb-12 font-medium leading-relaxed"
             >
-              SheShark is the premier ecosystem for women to lead the sustainable revolution. Build, scale, and thrive with AI-driven insights.
+              {t('landing.hero.subtitle')}
             </motion.p>
 
             <motion.div 
@@ -74,10 +65,10 @@ const Landing = () => {
               className="flex flex-wrap items-center justify-center gap-4"
             >
               <Button onClick={() => navigate('/login')} className="text-lg px-12 py-5 shadow-2xl shadow-primary/40">
-                Get Started <ArrowRight size={20} />
+                {t('landing.hero.getStarted')} <ArrowRight size={20} />
               </Button>
               <a href="/Sheshark.apk" download className="glass px-12 py-5 rounded-full font-bold text-primary hover:bg-primary/5 transition-all flex items-center gap-2">
-                Download App <Download size={20} />
+                {t('landing.hero.downloadApp')} <Download size={20} />
               </a>
             </motion.div>
           </div>
@@ -118,7 +109,7 @@ const Landing = () => {
                 <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
                   <Zap size={20} />
                 </div>
-                <div className="font-bold text-sm">Energy Analytics</div>
+                <div className="font-bold text-sm">{t('landing.hero.floatEnergy')}</div>
               </div>
               <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                 <motion.div 
@@ -142,7 +133,7 @@ const Landing = () => {
                 <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center text-pink-500">
                   <Heart size={20} />
                 </div>
-                <div className="font-bold text-sm">Health AI</div>
+                <div className="font-bold text-sm">{t('landing.hero.floatHealth')}</div>
               </div>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map(i => (
@@ -158,17 +149,17 @@ const Landing = () => {
       <section id="features" className="py-24 px-6 bg-slate-50/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Everything You Need to Succeed</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto">A comprehensive suite of tools designed specifically for the modern woman entrepreneur.</p>
+            <h2 className="text-4xl font-bold mb-4">{t('landing.features.title')}</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">{t('landing.features.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: Zap, title: "Energy Hub", desc: "Advanced solar analytics and savings calculators for your green business." },
-              { icon: Shield, title: "Safety First", desc: "Integrated SOS and women-only taxi services for complete peace of mind." },
-              { icon: Heart, title: "Health AI", desc: "Personalized wellness and health support powered by advanced AI." },
-              { icon: MessageSquare, title: "AI Advisor", desc: "24/7 business strategy and clean energy insights at your fingertips." },
-              { icon: ShoppingBag, title: "Marketplace", desc: "Connect with women-led brands and source premium solar equipment." },
-              { icon: Coins, title: "Funding Access", desc: "Direct access to grants, schemes, and investment opportunities." }
+              { icon: Zap, title: t('landing.features.cards.energyHub.title'), desc: t('landing.features.cards.energyHub.desc') },
+              { icon: Shield, title: t('landing.features.cards.safety.title'), desc: t('landing.features.cards.safety.desc') },
+              { icon: Heart, title: t('landing.features.cards.healthAi.title'), desc: t('landing.features.cards.healthAi.desc') },
+              { icon: MessageSquare, title: t('landing.features.cards.aiAdvisor.title'), desc: t('landing.features.cards.aiAdvisor.desc') },
+              { icon: ShoppingBag, title: t('landing.features.cards.marketplace.title'), desc: t('landing.features.cards.marketplace.desc') },
+              { icon: Coins, title: t('landing.features.cards.funding.title'), desc: t('landing.features.cards.funding.desc') },
             ].map((f, i) => (
               <motion.div
                 key={i}
@@ -195,30 +186,30 @@ const Landing = () => {
             className="mt-16 glass p-10 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-12 bg-gradient-to-br from-primary/5 to-transparent border-primary/20"
           >
             <div className="max-w-xl text-center md:text-left">
-              <h3 className="text-3xl font-bold mb-4">Get the SheShark App</h3>
+              <h3 className="text-3xl font-bold mb-4">{t('landing.appQr.title')}</h3>
               <p className="text-slate-600 text-lg mb-6">
-                Take the power of SheShark with you wherever you go. Scan the QR code to download our mobile application and start leading the revolution today.
+                {t('landing.appQr.body')}
               </p>
               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                 <a href="/Sheshark.apk" download className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors">
                   <Download size={18} />
-                  <span className="text-sm font-medium">Android APK</span>
+                  <span className="text-sm font-medium">{t('landing.appQr.androidApk')}</span>
                 </a>
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-400 rounded-xl cursor-not-allowed">
                   <Download size={18} />
-                  <span className="text-sm font-medium italic">iOS (Coming Soon)</span>
+                  <span className="text-sm font-medium italic">{t('landing.appQr.iosComing')}</span>
                 </div>
               </div>
             </div>
             <div className="bg-white p-6 rounded-3xl shadow-2xl shadow-primary/20 border-4 border-primary/10">
               <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(window.location.origin + '/Sheshark.apk')}`} 
-                alt="Download QR Code"
+                alt={t('landing.alt.qr')}
                 className="w-44 h-44"
                 referrerPolicy="no-referrer"
               />
               <div className="mt-4 text-center text-xs font-bold text-primary uppercase tracking-widest">
-                Scan to Download
+                {t('landing.appQr.scanDownload')}
               </div>
             </div>
           </motion.div>
@@ -230,10 +221,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto glass rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
           <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-12">
             {[
-              { label: "Active Users", value: "50K+" },
-              { label: "Energy Saved", value: "1.2MW" },
-              { label: "Businesses", value: "5K+" },
-              { label: "Safety SOS", value: "24/7" }
+              { label: t('landing.stats.activeUsers'), value: "50K+" },
+              { label: t('landing.stats.energySaved'), value: "1.2MW" },
+              { label: t('landing.stats.businesses'), value: "5K+" },
+              { label: t('landing.stats.safetySos'), value: "24/7" },
             ].map((s, i) => (
               <div key={i}>
                 <div className="text-4xl md:text-5xl font-bold gradient-text mb-2">{s.value}</div>
@@ -252,16 +243,16 @@ const Landing = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-bold mb-6">Our mission: <span className="text-primary">Powering equality</span></h2>
+            <h2 className="text-4xl font-bold mb-6">{t('landing.mission.title')} <span className="text-primary">{t('landing.mission.highlight')}</span></h2>
             <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-              We believe that the transition to clean energy is the greatest opportunity for economic empowerment in history. SheShark was founded to ensure that women aren't just participants in this revolution, but leaders.
+              {t('landing.mission.body')}
             </p>
             <div className="space-y-4">
               {[
-                "Bridging the gender gap in clean energy",
-                "Providing accessible AI-driven business tools",
-                "Ensuring physical and digital safety for women",
-                "Creating a global network of female innovators"
+                t('landing.mission.bullets.b1'),
+                t('landing.mission.bullets.b2'),
+                t('landing.mission.bullets.b3'),
+                t('landing.mission.bullets.b4'),
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <CheckCircle2 className="text-primary" size={24} />
@@ -279,14 +270,14 @@ const Landing = () => {
             <div className="aspect-square rounded-[3rem] overflow-hidden shadow-2xl bg-white flex items-center justify-center p-8 border border-slate-100">
               <img 
                 src="https://cdni.iconscout.com/illustration/premium/thumb/female-developer-working-on-laptop-illustration-svg-download-png-11313929.png" 
-                alt="Female developer working" 
+                alt={t('landing.alt.developer')} 
                 className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"
               />
             </div>
             <div className="absolute -bottom-10 -left-10 glass p-8 rounded-3xl shadow-xl hidden md:block">
               <div className="text-3xl font-bold text-primary">98%</div>
-              <div className="text-sm text-slate-500 font-medium">User Satisfaction Rate</div>
+              <div className="text-sm text-slate-500 font-medium">{t('landing.mission.statLabel')}</div>
             </div>
           </motion.div>
         </div>
@@ -295,13 +286,13 @@ const Landing = () => {
       {/* 5. How It Works */}
       <section className="py-24 px-6 bg-slate-50/50">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-16">Your Journey with SheShark</h2>
+          <h2 className="text-4xl font-bold mb-16">{t('landing.journey.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: "01", title: "Join", desc: "Create your profile and join the global community." },
-              { step: "02", title: "Learn", desc: "Access expert courses on solar and business." },
-              { step: "03", title: "Build", desc: "Use our AI tools to launch your energy business." },
-              { step: "04", title: "Scale", desc: "Connect with funders and grow your impact." }
+              { step: t('landing.journey.steps.s1.step'), title: t('landing.journey.steps.s1.title'), desc: t('landing.journey.steps.s1.desc') },
+              { step: t('landing.journey.steps.s2.step'), title: t('landing.journey.steps.s2.title'), desc: t('landing.journey.steps.s2.desc') },
+              { step: t('landing.journey.steps.s3.step'), title: t('landing.journey.steps.s3.title'), desc: t('landing.journey.steps.s3.desc') },
+              { step: t('landing.journey.steps.s4.step'), title: t('landing.journey.steps.s4.title'), desc: t('landing.journey.steps.s4.desc') },
             ].map((s, i) => (
               <div key={i} className="relative">
                 <div className="text-6xl font-bold text-primary/10 mb-4">{s.step}</div>
@@ -322,13 +313,13 @@ const Landing = () => {
               <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-primary/30">
                 <MessageSquare size={32} />
               </div>
-              <h2 className="text-4xl font-bold mb-6">Meet Your AI <span className="text-primary">Co-Pilot</span></h2>
+              <h2 className="text-4xl font-bold mb-6">{t('landing.aiShowcase.title')} <span className="text-primary">{t('landing.aiShowcase.titleHighlight')}</span></h2>
               <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                Our advanced AI models are trained specifically on clean energy markets and women's health data. Whether you need a business strategy or a wellness plan, SheShark AI is here 24/7.
+                {t('landing.aiShowcase.body')}
               </p>
               <div className="flex gap-4">
-                <Button onClick={() => navigate('/ai')}>Try AI Advisor</Button>
-                <Button variant="secondary">Watch Demo</Button>
+                <Button onClick={() => navigate('/ai')}>{t('landing.aiShowcase.tryAdvisor')}</Button>
+                <Button variant="secondary">{t('landing.aiShowcase.watchDemo')}</Button>
               </div>
             </div>
             <div className="space-y-6">
@@ -338,8 +329,8 @@ const Landing = () => {
                     <Star size={20} />
                   </div>
                   <div>
-                    <div className="font-bold mb-1">Business Strategy</div>
-                    <p className="text-sm text-slate-500">"How can I optimize my solar panel distribution in rural areas?"</p>
+                    <div className="font-bold mb-1">{t('landing.aiShowcase.cardBizTitle')}</div>
+                    <p className="text-sm text-slate-500">{t('landing.aiShowcase.cardBizQuote')}</p>
                   </div>
                 </div>
               </GlassCard>
@@ -349,8 +340,8 @@ const Landing = () => {
                     <Heart size={20} />
                   </div>
                   <div>
-                    <div className="font-bold mb-1">Health Support</div>
-                    <p className="text-sm text-slate-500">"Create a 15-minute wellness routine for a busy entrepreneur."</p>
+                    <div className="font-bold mb-1">{t('landing.aiShowcase.cardHealthTitle')}</div>
+                    <p className="text-sm text-slate-500">{t('landing.aiShowcase.cardHealthQuote')}</p>
                   </div>
                 </div>
               </GlassCard>
@@ -367,19 +358,19 @@ const Landing = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-bold mb-6">Smart <span className="text-primary">Energy</span> Analytics</h2>
+            <h2 className="text-4xl font-bold mb-6">{t('landing.energySection.title')} <span className="text-primary">{t('landing.energySection.titleHighlight')}</span> {t('landing.energySection.titleRest')}</h2>
             <p className="text-lg text-white/60 mb-8 leading-relaxed">
-              Track your solar production, calculate your carbon offset, and optimize your energy consumption with our state-of-the-art dashboard.
+              {t('landing.energySection.body')}
             </p>
             <ul className="space-y-4 mb-8">
-              {["Real-time production monitoring", "ROI & Payback calculators", "Carbon footprint tracking"].map((item, i) => (
+              {[t('landing.energySection.bullets.b1'), t('landing.energySection.bullets.b2'), t('landing.energySection.bullets.b3')].map((item, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <Zap className="text-primary" size={20} />
                   <span className="font-medium">{item}</span>
                 </li>
               ))}
             </ul>
-            <Button onClick={() => navigate('/energy')} className="bg-white text-slate-900 hover:bg-slate-100">Explore Energy Hub</Button>
+            <Button onClick={() => navigate('/energy')} className="bg-white text-slate-900 hover:bg-slate-100">{t('landing.energySection.cta')}</Button>
           </motion.div>
           <div className="relative">
             <div className="glass-dark p-8 rounded-[2rem] border-white/10">
@@ -396,7 +387,7 @@ const Landing = () => {
                 </div>
               </div>
               <div className="mt-6 flex justify-between text-white/40 text-xs font-bold uppercase tracking-widest">
-                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                <span>{t('months.Mon')}</span><span>{t('months.Tue')}</span><span>{t('months.Wed')}</span><span>{t('months.Thu')}</span><span>{t('months.Fri')}</span><span>{t('months.Sat')}</span><span>{t('months.Sun')}</span>
               </div>
             </div>
           </div>
@@ -407,15 +398,15 @@ const Landing = () => {
       {/* 8. Marketplace Preview */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">The SheShark <span className="text-primary">Marketplace</span></h2>
-          <p className="text-slate-500">Source the best equipment and support women-led businesses.</p>
+          <h2 className="text-4xl font-bold mb-4">{t('landing.marketplacePreview.title')} <span className="text-primary">{t('landing.marketplacePreview.titleHighlight')}</span></h2>
+          <p className="text-slate-500">{t('landing.marketplacePreview.subtitle')}</p>
         </div>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           {[
-            { name: "Microtek Inverter", price: "₹11,800", img: "https://m.media-amazon.com/images/I/31MsUvPF-CS._AC_UY436_FMwebp_QL65_.jpg" },
-            { name: "Exide Solar Battery", price: "₹14,102", img: "https://m.media-amazon.com/images/I/51KXnETjtgL._SX679_.jpg" },
-            { name: "Solarverter Hybrid", price: "₹29,999", img: "https://m.media-amazon.com/images/I/61+syISwrCL._SL1210_.jpg" },
-            { name: "Solar Flood Light", price: "₹4,400", img: "https://m.media-amazon.com/images/I/71vlWKh6ayL._SX679_.jpg" }
+            { name: t('landing.marketplaceDemo.p1'), price: "₹11,800", img: "https://m.media-amazon.com/images/I/31MsUvPF-CS._AC_UY436_FMwebp_QL65_.jpg" },
+            { name: t('landing.marketplaceDemo.p2'), price: "₹14,102", img: "https://m.media-amazon.com/images/I/51KXnETjtgL._SX679_.jpg" },
+            { name: t('landing.marketplaceDemo.p3'), price: "₹29,999", img: "https://m.media-amazon.com/images/I/61+syISwrCL._SL1210_.jpg" },
+            { name: t('landing.marketplaceDemo.p4'), price: "₹4,400", img: "https://m.media-amazon.com/images/I/71vlWKh6ayL._SX679_.jpg" },
           ].map((p, i) => (
             <GlassCard key={i} className="p-0 overflow-hidden group cursor-pointer flex flex-col">
               <div className="h-48 overflow-hidden bg-white p-4">
@@ -434,7 +425,7 @@ const Landing = () => {
           ))}
         </div>
         <div className="text-center mt-12">
-          <Button variant="secondary" onClick={() => navigate('/marketplace')}>Visit Marketplace <ArrowRight size={18} /></Button>
+          <Button variant="secondary" onClick={() => navigate('/marketplace')}>{t('landing.marketplacePreview.visit')} <ArrowRight size={18} /></Button>
         </div>
       </section>
 
@@ -460,19 +451,19 @@ const Landing = () => {
             </div>
           </div>
           <div className="order-1 lg:order-2">
-            <h2 className="text-4xl font-bold mb-6">A Global <span className="text-primary">Sisterhood</span></h2>
+            <h2 className="text-4xl font-bold mb-6">{t('landing.community.title')} <span className="text-primary">{t('landing.community.titleHighlight')}</span></h2>
             <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-              Don't build alone. Connect with thousands of women entrepreneurs around the world. Share insights, find partners, and celebrate your wins together.
+              {t('landing.community.body')}
             </p>
             <div className="flex items-center gap-4 mb-8">
               <div className="flex -space-x-4">
                 {[1, 2, 3, 4, 5].map(i => (
-                  <img key={i} src={`https://ui-avatars.com/api/?name=User+${i}&background=random`} className="w-12 h-12 rounded-full border-4 border-white" alt="User" />
+                  <img key={i} src={`https://ui-avatars.com/api/?name=User+${i}&background=random`} className="w-12 h-12 rounded-full border-4 border-white" alt="" />
                 ))}
               </div>
-              <div className="text-sm font-bold text-slate-500">+50,000 members</div>
+              <div className="text-sm font-bold text-slate-500">{t('landing.community.members')}</div>
             </div>
-            <Button onClick={() => navigate('/community')}>Join the Community</Button>
+            <Button onClick={() => navigate('/community')}>{t('landing.community.cta')}</Button>
           </div>
         </div>
       </section>
@@ -480,29 +471,29 @@ const Landing = () => {
       {/* 10. Testimonials */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Loved by <span className="text-primary">Entrepreneurs</span></h2>
-          <p className="text-slate-500">Real stories from women powering the future.</p>
+          <h2 className="text-4xl font-bold mb-4">{t('landing.testimonials.title')} <span className="text-primary">{t('landing.testimonials.titleHighlight')}</span></h2>
+          <p className="text-slate-500">{t('landing.testimonials.subtitle')}</p>
         </div>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { name: "Sarah Jenkins", role: "Solar Startup Founder", text: "SheShark changed everything for me. The AI advisor helped me refine my business plan in days, not months." },
-            { name: "Linda M.", role: "Clean Tech Investor", text: "The most comprehensive platform I've seen for women in energy. The funding module is a game-changer." },
-            { name: "Priya Sharma", role: "Energy Consultant", text: "I feel so much safer working on-site knowing I have the SOS feature and verified taxi services at my disposal." }
-          ].map((t, i) => (
+            { name: t('landing.testimonials.items.t1.name'), role: t('landing.testimonials.items.t1.role'), text: t('landing.testimonials.items.t1.text') },
+            { name: t('landing.testimonials.items.t2.name'), role: t('landing.testimonials.items.t2.role'), text: t('landing.testimonials.items.t2.text') },
+            { name: t('landing.testimonials.items.t3.name'), role: t('landing.testimonials.items.t3.role'), text: t('landing.testimonials.items.t3.text') },
+          ].map((tm, i) => (
             <GlassCard key={i} className="flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="flex text-yellow-400">
                   {[1, 2, 3, 4, 5].map(j => <Star key={j} size={16} fill="currentColor" />)}
                 </div>
-                <p className="text-slate-600 italic">"{t.text}"</p>
+                <p className="text-slate-600 italic">&quot;{tm.text}&quot;</p>
               </div>
               <div className="mt-8 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                  {t.name[0]}
+                  {tm.name[0]}
                 </div>
                 <div>
-                  <div className="font-bold">{t.name}</div>
-                  <div className="text-xs text-slate-400">{t.role}</div>
+                  <div className="font-bold">{tm.name}</div>
+                  <div className="text-xs text-slate-400">{tm.role}</div>
                 </div>
               </div>
             </GlassCard>
@@ -514,14 +505,14 @@ const Landing = () => {
       <section className="py-24 px-6 bg-slate-50/50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-slate-500">Everything you need to know about SheShark.</p>
+            <h2 className="text-4xl font-bold mb-4">{t('landing.faq.title')}</h2>
+            <p className="text-slate-500">{t('landing.faq.subtitle')}</p>
           </div>
           <div className="space-y-4">
             {[
-              { q: "Is SheShark only for women?", a: "Yes, SheShark is specifically designed to empower women entrepreneurs in the clean energy sector, providing a safe and supportive ecosystem." },
-              { q: "How does the AI Advisor work?", a: "Our AI uses advanced LLMs trained on clean energy and business data to provide real-time strategic advice tailored to your specific needs." },
-              { q: "Is the safety module available globally?", a: "The SOS feature works globally, while the verified taxi service is currently rolling out in major clean energy hubs." }
+              { q: t('landing.faq.q1.q'), a: t('landing.faq.q1.a') },
+              { q: t('landing.faq.q2.q'), a: t('landing.faq.q2.a') },
+              { q: t('landing.faq.q3.q'), a: t('landing.faq.q3.a') },
             ].map((f, i) => (
               <GlassCard key={i} className="p-6">
                 <h4 className="font-bold mb-2 flex items-center gap-2">
@@ -541,48 +532,48 @@ const Landing = () => {
             <div className="flex items-center gap-2">
               <img 
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310519663171441121/2KBq9fLXuEdZ49RpGeTHqX/sheshark-icon-Rrb6RfnX2Hdhp7NQQUGwTz.png" 
-                alt="SheShark Logo" 
+                alt={t('nav.brandAlt')} 
                 className="w-10 h-10 object-contain"
                 referrerPolicy="no-referrer"
               />
               <span className="text-2xl font-bold text-white">SheShark</span>
             </div>
             <p className="text-white/40 text-sm leading-relaxed">
-              Empowering the next generation of women leaders in the clean energy revolution. Built for impact, designed for equality.
+              {t('landing.footer.blurb')}
             </p>
           </div>
           <div>
-            <h4 className="font-bold mb-6">Platform</h4>
+            <h4 className="font-bold mb-6">{t('landing.footer.platform')}</h4>
             <ul className="space-y-4 text-white/60 text-sm">
-              <li><Link to="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
-              <li><Link to="/ai" className="hover:text-primary transition-colors">AI Assistant</Link></li>
-              <li><Link to="/marketplace" className="hover:text-primary transition-colors">Marketplace</Link></li>
-              <li><Link to="/energy" className="hover:text-primary transition-colors">Energy Hub</Link></li>
+              <li><Link to="/dashboard" className="hover:text-primary transition-colors">{t('nav.dashboard')}</Link></li>
+              <li><Link to="/ai" className="hover:text-primary transition-colors">{t('appShell.menu.aiAssistant')}</Link></li>
+              <li><Link to="/marketplace" className="hover:text-primary transition-colors">{t('nav.marketplace')}</Link></li>
+              <li><Link to="/energy" className="hover:text-primary transition-colors">{t('appShell.menu.energyHub')}</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-6">Community</h4>
+            <h4 className="font-bold mb-6">{t('landing.footer.community')}</h4>
             <ul className="space-y-4 text-white/60 text-sm">
-              <li><Link to="/community" className="hover:text-primary transition-colors">Feed</Link></li>
-              <li><Link to="/funding" className="hover:text-primary transition-colors">Grants</Link></li>
-              <li><Link to="/learning" className="hover:text-primary transition-colors">Learning</Link></li>
-              <li><Link to="/safety" className="hover:text-primary transition-colors">Safety</Link></li>
+              <li><Link to="/community" className="hover:text-primary transition-colors">{t('landing.footer.feed')}</Link></li>
+              <li><Link to="/funding" className="hover:text-primary transition-colors">{t('landing.footer.grants')}</Link></li>
+              <li><Link to="/learning" className="hover:text-primary transition-colors">{t('appShell.menu.learning')}</Link></li>
+              <li><Link to="/safety" className="hover:text-primary transition-colors">{t('appShell.menu.safety')}</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-6">Download</h4>
-            <p className="text-white/40 text-sm mb-6">Get the SheShark mobile app for safety on the go.</p>
+            <h4 className="font-bold mb-6">{t('landing.footer.download')}</h4>
+            <p className="text-white/40 text-sm mb-6">{t('landing.footer.downloadBlurb')}</p>
             <a href="/Sheshark.apk" download className="btn-primary flex items-center justify-center gap-2">
-              <Download size={18} /> Download APK
+              <Download size={18} /> {t('landing.footer.downloadApk')}
             </a>
           </div>
         </div>
         <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-xs font-medium">
-          <div>© 2026 SheShark Global. All rights reserved.</div>
+          <div>{t('landing.footer.rights')}</div>
           <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
+            <a href="#" className="hover:text-white transition-colors">{t('landing.footer.privacy')}</a>
+            <a href="#" className="hover:text-white transition-colors">{t('landing.footer.terms')}</a>
+            <a href="#" className="hover:text-white transition-colors">{t('landing.footer.cookies')}</a>
           </div>
         </div>
       </footer>

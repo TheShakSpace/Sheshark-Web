@@ -232,21 +232,24 @@ export const pagesEn = {
   ai: {
     title: 'AI workspace',
     subtitle:
-      'Mic and read-aloud use your browser (Hindi or English). Hundreds of answers match locally first — quick chips never use a cloud key. Optional OpenRouter only when you type a question with no library hit. No error popups; you always get plain text.',
+      'Ask in the business or wellness panels, use quick suggestions, or search the answer library. Mic and read-aloud follow the language you pick below.',
     libraryLine:
-      'Library: {{biz}} business + {{health}} health entries · Speech-to-text, play / pause / stop for replies — all on-device.',
+      'Library: {{biz}} business + {{health}} health answers · Tap play on any reply to hear it.',
     voiceLangLabel: 'Voice & mic:',
     businessAi: 'Business AI',
     healthAi: 'Health & wellness AI',
     keywordLib: 'Keyword answer library',
     keywordSub:
       "Search by keyword — tap an answer to paste it into that assistant's style thread.",
+    keywordSubSingle: 'Searching the {{mode}} library — tap an answer to add it to your chat above.',
+    assistantPickerAria: 'Choose business or wellness assistant',
     businessTab: 'Business',
     healthTab: 'Health',
     kwPlaceholder: 'Try: subsidy, stress, solar pump, periods, Mudra…',
     kwEmpty: 'Type to search curated answers.',
     kwNoHit: 'No keyword hit yet — try another word or use the live assistant above.',
     clearSide: 'Clear this side',
+    clearChat: 'Clear chat',
     thinking: 'Thinking…',
     placeholderBiz: 'Business question…',
     placeholderHealth: 'Wellness question…',
@@ -256,14 +259,13 @@ export const pagesEn = {
     speakPause: 'Pause',
     speakResume: 'Resume',
     speakStop: 'Stop',
-    sttTapStart: 'Speak to type (browser mic)',
+    sttTapStart: 'Speak to type',
     sttTapStop: 'Stop microphone',
-    sttListening: 'Listening — speak in Hindi or English.',
-    sttHint: 'Uses Web Speech API (Chrome / Edge work best). Language follows the English / Hindi toggle above.',
+    sttListening: 'Listening…',
     emptyBiz:
       'Business AI — ask about schemes, pricing, or sales scripts. Use quick chips below or the keyword library. Plain answers work with voice in English or Hindi.',
     emptyHealth:
-      'Health AI — wellness only, not a diagnosis. Server responses append India helpline numbers. For emergencies call 108.',
+      'Health AI — wellness only, not a diagnosis. Replies may include India helpline numbers. For emergencies call 108.',
     chips: {
       b1: 'PM-KUSUM basics for my block',
       b2: 'WhatsApp script for solar lamp leads',
@@ -275,7 +277,7 @@ export const pagesEn = {
       h4: 'Stress before investor meeting',
     },
     fallbackBiz:
-      'Here is a concise next step: write down three customers you can call this week about a small solar SKU, and open the learning tab for the “first energy business” course. I am running in offline-safe mode right now.',
+      'Here is a concise next step: write down three customers you can call this week about a small solar SKU, and open the learning tab for the “first energy business” course.',
     fallbackHealth:
       'Gentle reminder: breathe slowly for one minute, sip water, and stretch shoulders. If something feels urgent or severe, call 108 or visit the nearest clinic. Saving SheShark helpline block below for you.\n\nWomen helpline: 181\nPolice: 100\nAmbulance: 108\nMental health: 14416',
   },

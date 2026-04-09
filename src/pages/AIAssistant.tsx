@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import axios from "axios";
 import { searchKnowledgeEntries, countKnowledgeEntries, findKnowledgeReply } from "@/lib/knowledgeSearch";
 import { appendHealthFooter } from "@/lib/healthAiFooter";
+import { pickVoiceForLang, whenVoicesReady } from "@/lib/speechVoices";
 
 const CHIP_KEYS_B = ["b1", "b2", "b3", "b4"] as const;
 const CHIP_KEYS_H = ["h1", "h2", "h3", "h4"] as const;
@@ -42,10 +43,18 @@ function finalizeReply(mode: "business" | "health", body: string): string {
 
 type TtsLang = "hi-IN" | "en-IN";
 
-function buildUtterance(text: string, lang: TtsLang): SpeechSynthesisUtterance {
+/** Never show vendor/configuration apology text as a bot reply. */
+function isNoiseApiPayload(text: string): boolean {
+  return /\bnot\s+configured\b|api\s*key|open\s*router|trouble\s+connecting|try\s+again\s+later|\bi\s*['']?m\s+sorry\b|couldn['']?t\s+connect\b/i.test(
+    text,
+  );
+}
+
+function buildUtterance(text: string, lang: TtsLang, voice: SpeechSynthesisVoice | null): SpeechSynthesisUtterance {
   const clean = stripDisplayNoise(text).replace(/\n+/g, ". ");
   const u = new SpeechSynthesisUtterance(clean);
   u.lang = lang;
+  if (voice) u.voice = voice;
   u.rate = lang.startsWith("hi") ? 0.92 : 1;
   return u;
 }
@@ -89,6 +98,9 @@ function ChatPanel({
   }, [list, loading]);
 
   useEffect(() => {
+    whenVoicesReady(() => {
+      window.speechSynthesis?.getVoices();
+    });
     return () => {
       window.speechSynthesis?.cancel();
     };
@@ -123,7 +135,7 @@ function ChatPanel({
     setLoading(true);
     try {
       const { data, status } = await axios.post("/api/ai/chat", { message: raw, mode }, { validateStatus: () => true });
-      const reply =
+      let reply =
         status >= 200 &&
         status < 500 &&
         data &&
@@ -131,6 +143,7 @@ function ChatPanel({
         data.reply.trim()
           ? data.reply
           : fallbackText;
+      if (isNoiseApiPayload(reply)) reply = fallbackText;
       addChatMessage(mode, { role: "model", parts: [{ text: finalizeReply(mode, reply) }] });
     } catch {
       addChatMessage(mode, { role: "model", parts: [{ text: finalizeReply(mode, fallbackText) }] });
@@ -142,11 +155,15 @@ function ChatPanel({
   const speakAt = (index: number, text: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const u = buildUtterance(text, ttsLang);
-    u.onstart = () => setTts({ index, phase: "speaking" });
-    u.onend = () => setTts({ index: null, phase: "idle" });
-    u.onerror = () => setTts({ index: null, phase: "idle" });
-    window.speechSynthesis.speak(u);
+    whenVoicesReady(() => {
+      if (!window.speechSynthesis) return;
+      const voice = pickVoiceForLang(ttsLang);
+      const u = buildUtterance(text, ttsLang, voice);
+      u.onstart = () => setTts({ index, phase: "speaking" });
+      u.onend = () => setTts({ index: null, phase: "idle" });
+      u.onerror = () => setTts({ index: null, phase: "idle" });
+      window.speechSynthesis.speak(u);
+    });
   };
 
   const toggleTts = (index: number, text: string) => {
@@ -223,8 +240,8 @@ function ChatPanel({
   const chipKeys = mode === "business" ? CHIP_KEYS_B : CHIP_KEYS_H;
 
   return (
-    <GlassCard className="flex flex-col p-0 overflow-hidden min-h-[420px] lg:border-2 border-white/40">
-      <div className={cn("px-4 py-3 flex items-center justify-between border-b border-slate-100/80", accentClass)}>
+    <GlassCard className="flex h-[min(72dvh,42rem)] max-h-[44rem] min-h-[20rem] w-full flex-col overflow-hidden border-white/40 p-0 lg:border-2">
+      <div className={cn("flex shrink-0 items-center justify-between border-b border-slate-100/80 px-4 py-3", accentClass)}>
         <div className="flex items-center gap-2 font-bold text-slate-800">
           <Icon size={20} />
           {title}
@@ -236,12 +253,15 @@ function ChatPanel({
             clearChatMessages(mode);
           }}
           className="p-2 rounded-xl hover:bg-white/60 text-slate-500"
-          title={t("ai.clearSide")}
+          title={t("ai.clearChat")}
         >
           <Trash2 size={18} />
         </button>
       </div>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[min(52vh,520px)] scroll-smooth bg-white/30">
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth bg-white/30 p-4 overscroll-contain"
+      >
         {list.length === 0 && !loading && (
           <div className="rounded-2xl border border-dashed border-slate-200 p-4 text-sm text-slate-500 bg-white/50">
             {mode === "business" ? t("ai.emptyBiz") : t("ai.emptyHealth")}
@@ -308,7 +328,7 @@ function ChatPanel({
           </div>
         )}
       </div>
-      <div className="p-3 border-t border-slate-100 space-y-2 bg-white/40">
+      <div className="shrink-0 space-y-2 border-t border-slate-100 bg-white/40 p-3">
         <div className="flex flex-wrap gap-2">
           {chipKeys.map((k) => (
             <button
@@ -349,9 +369,11 @@ function ChatPanel({
             <Send size={20} />
           </Button>
         </div>
-        {canStt && (
-          <p className="text-[10px] text-slate-400 px-1">{sttOn ? t("ai.sttListening") : t("ai.sttHint")}</p>
-        )}
+        {canStt && sttOn ? (
+          <p className="text-[10px] text-slate-400 px-1" aria-live="polite">
+            {t("ai.sttListening")}
+          </p>
+        ) : null}
       </div>
     </GlassCard>
   );
@@ -361,7 +383,7 @@ const AIAssistant = () => {
   const { t, i18n } = useTranslation();
   const [ttsLang, setTtsLang] = useState<TtsLang>(i18n.language === "hi" ? "hi-IN" : "en-IN");
   const [libQuery, setLibQuery] = useState("");
-  const [libMode, setLibMode] = useState<"business" | "health">("business");
+  const [assistantMode, setAssistantMode] = useState<"business" | "health">("business");
 
   useEffect(() => {
     setTtsLang(i18n.language === "hi" ? "hi-IN" : "en-IN");
@@ -369,78 +391,96 @@ const AIAssistant = () => {
 
   const bizCount = useMemo(() => countKnowledgeEntries("business"), []);
   const healthCount = useMemo(() => countKnowledgeEntries("health"), []);
-  const matches = useMemo(() => searchKnowledgeEntries(libQuery, libMode, 25), [libQuery, libMode]);
+  const matches = useMemo(() => searchKnowledgeEntries(libQuery, assistantMode, 25), [libQuery, assistantMode]);
 
   return (
-    <div className="space-y-8 pb-24">
-      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
+    <div className="mx-auto max-w-3xl space-y-6 pb-24">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-3xl font-bold">
             <Sparkles className="text-primary" /> {t("ai.title")}
           </h1>
-          <p className="text-slate-500 mt-1 max-w-2xl">{t("ai.subtitle")}</p>
-          <p className="text-xs text-slate-400 mt-2">{t("ai.libraryLine", { biz: bizCount, health: healthCount })}</p>
+          <p className="mt-1 max-w-2xl text-slate-500">{t("ai.subtitle")}</p>
+          <p className="mt-2 text-xs text-slate-400">{t("ai.libraryLine", { biz: bizCount, health: healthCount })}</p>
         </div>
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm text-slate-500 mr-2">{t("ai.voiceLangLabel")}</span>
-          <button
-            type="button"
-            onClick={() => setTtsLang("en-IN")}
-            className={cn(
-              "px-4 py-2 rounded-xl text-sm font-semibold border transition-all",
-              ttsLang === "en-IN" ? "bg-primary text-white border-primary" : "bg-white/80 border-slate-200 text-slate-600",
-            )}
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div
+            className="flex w-full rounded-2xl border border-slate-200/80 bg-white/70 p-1 shadow-sm sm:max-w-xl"
+            role="tablist"
+            aria-label={t("ai.assistantPickerAria")}
           >
-            {t("lang.english")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTtsLang("hi-IN")}
-            className={cn(
-              "px-4 py-2 rounded-xl text-sm font-semibold border transition-all",
-              ttsLang === "hi-IN" ? "bg-primary text-white border-primary" : "bg-white/80 border-slate-200 text-slate-600",
-            )}
-          >
-            {t("lang.hindi")}
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        <ChatPanel mode="business" ttsLang={ttsLang} title={t("ai.businessAi")} icon={Briefcase} accentClass="bg-primary/10" />
-        <ChatPanel mode="health" ttsLang={ttsLang} title={t("ai.healthAi")} icon={Heart} accentClass="bg-rose-100/80" />
-      </div>
-
-      <GlassCard className="p-6 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Search className="text-primary" size={22} /> {t("ai.keywordLib")}
-            </h2>
-            <p className="text-sm text-slate-500">{t("ai.keywordSub")}</p>
-          </div>
-          <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setLibMode("business")}
+              role="tab"
+              aria-selected={assistantMode === "business"}
+              onClick={() => setAssistantMode("business")}
               className={cn(
-                "px-4 py-2 rounded-xl text-sm font-semibold",
-                libMode === "business" ? "bg-primary text-white" : "bg-slate-100 text-slate-600",
+                "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all",
+                assistantMode === "business"
+                  ? "bg-primary text-white shadow-md"
+                  : "text-slate-600 hover:bg-slate-100/80",
               )}
             >
-              {t("ai.businessTab")}
+              <Briefcase size={18} aria-hidden />
+              {t("ai.businessAi")}
             </button>
             <button
               type="button"
-              onClick={() => setLibMode("health")}
+              role="tab"
+              aria-selected={assistantMode === "health"}
+              onClick={() => setAssistantMode("health")}
               className={cn(
-                "px-4 py-2 rounded-xl text-sm font-semibold",
-                libMode === "health" ? "bg-rose-600 text-white" : "bg-slate-100 text-slate-600",
+                "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all",
+                assistantMode === "health"
+                  ? "bg-rose-600 text-white shadow-md"
+                  : "text-slate-600 hover:bg-slate-100/80",
               )}
             >
-              {t("ai.healthTab")}
+              <Heart size={18} aria-hidden />
+              {t("ai.healthAi")}
             </button>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-slate-500">{t("ai.voiceLangLabel")}</span>
+            <button
+              type="button"
+              onClick={() => setTtsLang("en-IN")}
+              className={cn(
+                "rounded-xl border px-3 py-2 text-sm font-semibold transition-all",
+                ttsLang === "en-IN" ? "border-primary bg-primary text-white" : "border-slate-200 bg-white/80 text-slate-600",
+              )}
+            >
+              {t("lang.english")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setTtsLang("hi-IN")}
+              className={cn(
+                "rounded-xl border px-3 py-2 text-sm font-semibold transition-all",
+                ttsLang === "hi-IN" ? "border-primary bg-primary text-white" : "border-slate-200 bg-white/80 text-slate-600",
+              )}
+            >
+              {t("lang.hindi")}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ChatPanel
+        key={assistantMode}
+        mode={assistantMode}
+        ttsLang={ttsLang}
+        title={assistantMode === "business" ? t("ai.businessAi") : t("ai.healthAi")}
+        icon={assistantMode === "business" ? Briefcase : Heart}
+        accentClass={assistantMode === "business" ? "bg-primary/10" : "bg-rose-100/80"}
+      />
+
+      <GlassCard className="space-y-4 p-6">
+        <div>
+          <h2 className="flex items-center gap-2 text-xl font-bold">
+            <Search className="text-primary" size={22} /> {t("ai.keywordLib")}
+          </h2>
+          <p className="text-sm text-slate-500">{t("ai.keywordSubSingle", { mode: t(assistantMode === "business" ? "ai.businessTab" : "ai.healthTab") })}</p>
         </div>
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -460,7 +500,7 @@ const AIAssistant = () => {
               type="button"
               onClick={() => {
                 const { addChatMessage } = useStore.getState();
-                addChatMessage(libMode, { role: "model", parts: [{ text: finalizeReply(libMode, entry.answer) }] });
+                addChatMessage(assistantMode, { role: "model", parts: [{ text: finalizeReply(assistantMode, entry.answer) }] });
               }}
               className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all"
             >

@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { appendHealthFooter } from "../src/lib/healthAiFooter";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,10 +19,15 @@ let cachedData: KnowledgeEntry[] | null = null;
 
 function loadKnowledge(): KnowledgeEntry[] {
   if (cachedData) return cachedData;
-  const repoRoot = path.join(__dirname, "..", "..", "..");
-  const kbPath = path.join(repoRoot, "lib", "ai-knowledge-data.json");
-  const raw = fs.readFileSync(kbPath, "utf-8");
-  cachedData = JSON.parse(raw) as KnowledgeEntry[];
+  const repoRoot = path.join(__dirname, "..");
+  const kbPath = path.join(repoRoot, "src", "data", "ai-knowledge-data.json");
+  try {
+    const raw = fs.readFileSync(kbPath, "utf-8");
+    cachedData = JSON.parse(raw) as KnowledgeEntry[];
+  } catch (err) {
+    console.error("[aiChat] knowledge file missing or invalid:", kbPath, err);
+    cachedData = [];
+  }
   return cachedData;
 }
 
@@ -132,24 +138,6 @@ export function formatAiPlainText(text: string): string {
     .trim();
   s = s.replace(/\n{3,}/g, "\n\n");
   return s;
-}
-
-const HEALTH_CONTACTS_IN = `
----
-SheShark health directory (India — confirm numbers with your state or provider):
-Women helpline: 181
-Police: 100
-Ambulance / medical emergency: 108 (use 102 in some regions)
-National mental health helpline: 14416
-NIMHANS mental health: 08046110007
-This assistant is not a substitute for emergency services or a clinician.`;
-
-function appendHealthFooter(mode: KnowledgeMode, body: string): string {
-  if (mode !== "health") return body;
-  const t = body.trim();
-  if (!t) return HEALTH_CONTACTS_IN.trim();
-  if (t.includes("Women helpline: 181")) return t;
-  return `${t}\n${HEALTH_CONTACTS_IN}`;
 }
 
 async function runOpenRouterChat(message: string, mode: KnowledgeMode): Promise<string | null> {

@@ -232,9 +232,10 @@ export const pagesEn = {
   ai: {
     title: 'AI workspace',
     subtitle:
-      'Business and Health assistants side by side, keyword library with hundreds of curated answers, OpenRouter on the server when configured, and graceful plain-text fallbacks — no error screens.',
-    libraryLine: 'Library: {{biz}} business + {{health}} health entries · Voice uses your browser (Hindi / Indian English).',
-    readAloud: 'Read aloud:',
+      'Mic and read-aloud use your browser (Hindi or English). Hundreds of answers match locally first — quick chips never use a cloud key. Optional OpenRouter only when you type a question with no library hit. No error popups; you always get plain text.',
+    libraryLine:
+      'Library: {{biz}} business + {{health}} health entries · Speech-to-text, play / pause / stop for replies — all on-device.',
+    voiceLangLabel: 'Voice & mic:',
     businessAi: 'Business AI',
     healthAi: 'Health & wellness AI',
     keywordLib: 'Keyword answer library',
@@ -249,9 +250,16 @@ export const pagesEn = {
     thinking: 'Thinking…',
     placeholderBiz: 'Business question…',
     placeholderHealth: 'Wellness question…',
-    listenEn: '(English voice)',
-    listenHi: '(Hindi voice)',
-    listen: 'Listen',
+    listenEn: 'English',
+    listenHi: 'Hindi',
+    speakPlay: 'Play',
+    speakPause: 'Pause',
+    speakResume: 'Resume',
+    speakStop: 'Stop',
+    sttTapStart: 'Speak to type (browser mic)',
+    sttTapStop: 'Stop microphone',
+    sttListening: 'Listening — speak in Hindi or English.',
+    sttHint: 'Uses Web Speech API (Chrome / Edge work best). Language follows the English / Hindi toggle above.',
     emptyBiz:
       'Business AI — ask about schemes, pricing, or sales scripts. Use quick chips below or the keyword library. Plain answers work with voice in English or Hindi.',
     emptyHealth:

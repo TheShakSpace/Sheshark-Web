@@ -7,38 +7,50 @@ import {
   User,
   Briefcase,
   Heart,
-  Volume2,
+  Mic,
   Search,
   Sparkles,
   Trash2,
+  Play,
+  Pause,
+  Square,
 } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { cn } from "@/lib/utils";
 import axios from "axios";
-import { searchKnowledgeEntries, countKnowledgeEntries } from "@/lib/knowledgeSearch";
+import { searchKnowledgeEntries, countKnowledgeEntries, findKnowledgeReply } from "@/lib/knowledgeSearch";
+import { appendHealthFooter } from "@/lib/healthAiFooter";
 
 const CHIP_KEYS_B = ["b1", "b2", "b3", "b4"] as const;
 const CHIP_KEYS_H = ["h1", "h2", "h3", "h4"] as const;
 
+/** Plain assistant text (matches server `formatAiPlainText` enough for display + voice). */
 function stripDisplayNoise(text: string): string {
-  return text
+  let s = text
     .replace(/\*\*/g, "")
     .replace(/\*/g, "")
     .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/`+/g, "")
     .trim();
+  return s.replace(/\n{3,}/g, "\n\n");
+}
+
+function finalizeReply(mode: "business" | "health", body: string): string {
+  return appendHealthFooter(mode, stripDisplayNoise(body));
 }
 
 type TtsLang = "hi-IN" | "en-IN";
 
-function speakText(text: string, lang: TtsLang) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
+function buildUtterance(text: string, lang: TtsLang): SpeechSynthesisUtterance {
   const clean = stripDisplayNoise(text).replace(/\n+/g, ". ");
-  window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(clean);
   u.lang = lang;
   u.rate = lang.startsWith("hi") ? 0.92 : 1;
-  window.speechSynthesis.speak(u);
+  return u;
 }
+
+type TtsPhase = "idle" | "speaking" | "paused";
 
 function ChatPanel({
   mode,
@@ -60,27 +72,151 @@ function ChatPanel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const list = chats[mode] || [];
 
+  const [tts, setTts] = useState<{ index: number | null; phase: TtsPhase }>({ index: null, phase: "idle" });
+  const [sttOn, setSttOn] = useState(false);
+  const recRef = useRef<SpeechRecognition | null>(null);
+
+  const canStt =
+    typeof window !== "undefined" &&
+    Boolean(
+      (window as Window & { SpeechRecognition?: new () => SpeechRecognition; webkitSpeechRecognition?: new () => SpeechRecognition })
+        .SpeechRecognition ||
+        (window as Window & { webkitSpeechRecognition?: new () => SpeechRecognition }).webkitSpeechRecognition,
+    );
+
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [list, loading]);
 
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis?.cancel();
+    };
+  }, []);
+
+  const pushLocalExchange = (userText: string, answerBody: string) => {
+    addChatMessage(mode, { role: "user", parts: [{ text: userText }] });
+    addChatMessage(mode, { role: "model", parts: [{ text: finalizeReply(mode, answerBody) }] });
+  };
+
   const fallbackText = mode === "business" ? t("ai.fallbackBiz") : t("ai.fallbackHealth");
 
-  const send = async (text?: string) => {
+  const send = async (text?: string, options?: { fromChip?: boolean }) => {
     const raw = (text ?? input).trim();
     if (!raw || loading) return;
+
+    const fromKb = findKnowledgeReply(raw, mode);
+    if (fromKb) {
+      setInput("");
+      pushLocalExchange(raw, fromKb);
+      return;
+    }
+
+    if (options?.fromChip) {
+      setInput("");
+      pushLocalExchange(raw, fallbackText);
+      return;
+    }
+
     addChatMessage(mode, { role: "user", parts: [{ text: raw }] });
     setInput("");
     setLoading(true);
     try {
-      const { data } = await axios.post("/api/ai/chat", { message: raw, mode });
-      const reply = typeof data.reply === "string" ? data.reply : typeof data.text === "string" ? data.text : "";
-      const safe = stripDisplayNoise(reply || fallbackText);
-      addChatMessage(mode, { role: "model", parts: [{ text: safe }] });
+      const { data, status } = await axios.post("/api/ai/chat", { message: raw, mode }, { validateStatus: () => true });
+      const reply =
+        status >= 200 &&
+        status < 500 &&
+        data &&
+        typeof data.reply === "string" &&
+        data.reply.trim()
+          ? data.reply
+          : fallbackText;
+      addChatMessage(mode, { role: "model", parts: [{ text: finalizeReply(mode, reply) }] });
     } catch {
-      addChatMessage(mode, { role: "model", parts: [{ text: stripDisplayNoise(fallbackText) }] });
+      addChatMessage(mode, { role: "model", parts: [{ text: finalizeReply(mode, fallbackText) }] });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const speakAt = (index: number, text: string) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = buildUtterance(text, ttsLang);
+    u.onstart = () => setTts({ index, phase: "speaking" });
+    u.onend = () => setTts({ index: null, phase: "idle" });
+    u.onerror = () => setTts({ index: null, phase: "idle" });
+    window.speechSynthesis.speak(u);
+  };
+
+  const toggleTts = (index: number, text: string) => {
+    if (!window.speechSynthesis) return;
+    if (tts.index === index && tts.phase === "speaking") {
+      try {
+        window.speechSynthesis.pause();
+        setTts({ index, phase: "paused" });
+      } catch {
+        setTts({ index: null, phase: "idle" });
+      }
+      return;
+    }
+    if (tts.index === index && tts.phase === "paused") {
+      try {
+        window.speechSynthesis.resume();
+        setTts({ index, phase: "speaking" });
+      } catch {
+        speakAt(index, text);
+      }
+      return;
+    }
+    speakAt(index, text);
+  };
+
+  const stopTts = () => {
+    window.speechSynthesis?.cancel();
+    setTts({ index: null, phase: "idle" });
+  };
+
+  const startSpeechToText = () => {
+    if (!canStt || loading) return;
+    if (sttOn) {
+      try {
+        recRef.current?.stop();
+      } catch {
+        /* ignore */
+      }
+      recRef.current = null;
+      setSttOn(false);
+      return;
+    }
+    type SpeechRecCtor = new () => SpeechRecognition;
+    const W = window as Window & { SpeechRecognition?: SpeechRecCtor; webkitSpeechRecognition?: SpeechRecCtor };
+    const SR = W.SpeechRecognition || W.webkitSpeechRecognition;
+    if (!SR) return;
+    const rec = new SR();
+    recRef.current = rec;
+    rec.lang = ttsLang;
+    rec.interimResults = false;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (ev: SpeechRecognitionEvent) => {
+      const line = ev.results[0]?.[0]?.transcript?.trim();
+      if (line) setInput((prev) => (prev ? `${prev} ${line}` : line));
+    };
+    rec.onend = () => {
+      recRef.current = null;
+      setSttOn(false);
+    };
+    rec.onerror = () => {
+      recRef.current = null;
+      setSttOn(false);
+    };
+    try {
+      rec.start();
+      setSttOn(true);
+    } catch {
+      recRef.current = null;
+      setSttOn(false);
     }
   };
 
@@ -95,7 +231,10 @@ function ChatPanel({
         </div>
         <button
           type="button"
-          onClick={() => clearChatMessages(mode)}
+          onClick={() => {
+            stopTts();
+            clearChatMessages(mode);
+          }}
           className="p-2 rounded-xl hover:bg-white/60 text-slate-500"
           title={t("ai.clearSide")}
         >
@@ -126,13 +265,36 @@ function ChatPanel({
             >
               <div className="whitespace-pre-wrap font-normal">{stripDisplayNoise(msg.parts[0]?.text ?? "")}</div>
               {msg.role === "model" && (
-                <button
-                  type="button"
-                  className="mt-2 inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline"
-                  onClick={() => speakText(msg.parts[0]?.text ?? "", ttsLang)}
-                >
-                  <Volume2 size={14} /> {t("ai.listen")} {ttsLang.startsWith("hi") ? t("ai.listenHi") : t("ai.listenEn")}
-                </button>
+                <div className="mt-2 flex flex-wrap gap-2 items-center">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline"
+                    onClick={() => toggleTts(i, msg.parts[0]?.text ?? "")}
+                  >
+                    {tts.index === i && tts.phase === "speaking" ? (
+                      <>
+                        <Pause size={14} /> {t("ai.speakPause")}
+                      </>
+                    ) : tts.index === i && tts.phase === "paused" ? (
+                      <>
+                        <Play size={14} /> {t("ai.speakResume")}
+                      </>
+                    ) : (
+                      <>
+                        <Play size={14} /> {t("ai.speakPlay")} ({ttsLang.startsWith("hi") ? t("ai.listenHi") : t("ai.listenEn")})
+                      </>
+                    )}
+                  </button>
+                  {tts.index === i && (tts.phase === "speaking" || tts.phase === "paused") && (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-xs text-slate-600 font-medium hover:underline"
+                      onClick={stopTts}
+                    >
+                      <Square size={12} /> {t("ai.speakStop")}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -152,14 +314,28 @@ function ChatPanel({
             <button
               key={k}
               type="button"
-              onClick={() => send(t(`ai.chips.${k}`))}
+              onClick={() => send(t(`ai.chips.${k}`), { fromChip: true })}
               className="text-[11px] px-2 py-1 rounded-full bg-slate-100 text-slate-600 hover:bg-primary/15 hover:text-primary"
             >
               {t(`ai.chips.${k}`)}
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {canStt && (
+            <button
+              type="button"
+              onClick={startSpeechToText}
+              disabled={loading}
+              title={sttOn ? t("ai.sttTapStop") : t("ai.sttTapStart")}
+              className={cn(
+                "h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border transition-all",
+                sttOn ? "bg-rose-500 text-white border-rose-500 animate-pulse" : "bg-white/90 border-slate-200 text-slate-600 hover:bg-primary/10",
+              )}
+            >
+              <Mic size={20} aria-hidden />
+            </button>
+          )}
           <input
             type="text"
             value={input}
@@ -167,11 +343,15 @@ function ChatPanel({
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder={mode === "business" ? t("ai.placeholderBiz") : t("ai.placeholderHealth")}
             className="flex-1 glass px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            disabled={loading}
           />
           <Button onClick={() => send()} loading={loading} className="h-12 w-12 rounded-xl p-0 flex items-center justify-center shrink-0">
             <Send size={20} />
           </Button>
         </div>
+        {canStt && (
+          <p className="text-[10px] text-slate-400 px-1">{sttOn ? t("ai.sttListening") : t("ai.sttHint")}</p>
+        )}
       </div>
     </GlassCard>
   );
@@ -202,7 +382,7 @@ const AIAssistant = () => {
           <p className="text-xs text-slate-400 mt-2">{t("ai.libraryLine", { biz: bizCount, health: healthCount })}</p>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm text-slate-500 mr-2">{t("ai.readAloud")}</span>
+          <span className="text-sm text-slate-500 mr-2">{t("ai.voiceLangLabel")}</span>
           <button
             type="button"
             onClick={() => setTtsLang("en-IN")}
@@ -280,7 +460,7 @@ const AIAssistant = () => {
               type="button"
               onClick={() => {
                 const { addChatMessage } = useStore.getState();
-                addChatMessage(libMode, { role: "model", parts: [{ text: stripDisplayNoise(entry.answer) }] });
+                addChatMessage(libMode, { role: "model", parts: [{ text: finalizeReply(libMode, entry.answer) }] });
               }}
               className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all"
             >

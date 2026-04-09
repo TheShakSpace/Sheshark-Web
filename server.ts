@@ -4,7 +4,8 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import { runAiChat, normalizePromptForAiApi } from "./server/aiChat";
+import { runAiChat, normalizePromptForAiApi, getKnowledgeFallback, formatAiPlainText } from "./server/aiChat";
+import { appendHealthFooter } from "./src/lib/healthAiFooter";
 
 dotenv.config();
 
@@ -70,8 +71,9 @@ async function startServer() {
     } catch (e) {
       console.error("[api/ai/chat]", e);
       const mode = (req.body as { mode?: string })?.mode === "health" ? "health" : "business";
-      const fallback = await runAiChat("tip of the day", mode);
-      res.json({ reply: fallback.reply, source: "local", text: fallback.reply });
+      const fb = formatAiPlainText(getKnowledgeFallback(mode));
+      const reply = appendHealthFooter(mode, fb);
+      res.json({ reply, source: "local", text: reply });
     }
   });
 

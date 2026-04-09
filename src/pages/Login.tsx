@@ -263,7 +263,7 @@ const Login = () => {
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
               <span className="text-white font-bold text-xl">S</span>
             </div>
-            <span className="text-2xl font-bold gradient-text">SheShark</span>
+            <span className="text-2xl font-bold gradient-text">{t('nav.brandWordmark')}</span>
           </Link>
           <h1 className="text-3xl font-bold">{isLogin ? t('login.welcomeBack') : t('login.createAccount')}</h1>
           <p className="text-slate-500 mt-2 text-sm leading-relaxed max-w-sm mx-auto">

@@ -70,11 +70,16 @@ const SidebarItem = ({ to, icon: Icon, label, active, isCollapsed }: any) => (
 
 const Navbar = () => {
   const { user } = useStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-      <div className="max-w-7xl mx-auto glass rounded-full px-6 py-3 flex items-center justify-between gap-3">
+      <div
+        className={cn(
+          'mx-auto glass rounded-full px-6 py-3 flex items-center justify-between gap-3',
+          i18n.language === 'hi' ? 'max-w-[90rem]' : 'max-w-7xl',
+        )}
+      >
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <img
             src="/icon.png"
@@ -82,7 +87,7 @@ const Navbar = () => {
             className="w-10 h-10 object-contain"
             referrerPolicy="no-referrer"
           />
-          <span className="text-2xl font-bold gradient-text">SheShark</span>
+          <span className="text-2xl font-bold gradient-text">{t('nav.brandWordmark')}</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-6 lg:gap-8">
@@ -176,7 +181,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             isSidebarOpen ? "w-72" : "w-20"
           )}>
             <div className="p-6 flex items-center justify-between gap-2">
-              {isSidebarOpen && <span className="text-2xl font-bold gradient-text">SheShark</span>}
+              {isSidebarOpen && <span className="text-2xl font-bold gradient-text">{t('nav.brandWordmark')}</span>}
               <div className="flex items-center gap-1 ml-auto">
                 {isSidebarOpen && <LanguageSwitcher variant="compact" />}
                 <button

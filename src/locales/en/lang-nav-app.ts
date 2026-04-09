@@ -15,6 +15,8 @@ export const langNavAppEn = {
     login: 'Login',
     joinNow: 'Join Now',
     brandAlt: 'SheShark Logo',
+    /** Wordmark next to logo — Latin for English UI */
+    brandWordmark: 'SheShark',
     profileAlt: 'Profile',
   },
   appShell: {

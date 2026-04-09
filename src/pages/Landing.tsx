@@ -20,17 +20,24 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isHi = i18n.language === 'hi';
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-x-hidden overflow-y-visible">
       {/* 1. Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto w-full relative z-10">
-          <div className="text-center max-w-4xl mx-auto">
+          <div
+            className={cn(
+              'text-center mx-auto px-1 sm:px-2',
+              isHi ? 'max-w-6xl md:max-w-[80rem] lg:max-w-[90rem]' : 'max-w-4xl',
+            )}
+          >
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -43,10 +50,16 @@ const Landing = () => {
               initial={{ opacity: 0, y: 50, rotateX: -45 }}
               animate={{ opacity: 1, y: 0, rotateX: 0 }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="hero-title text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[1.1] uppercase"
+              className={cn(
+                'hero-title font-black mb-8 overflow-visible',
+                isHi
+                  ? 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl normal-case tracking-normal md:tracking-wide leading-[1.35] sm:leading-[1.32] py-1'
+                  : 'text-4xl sm:text-6xl md:text-8xl uppercase tracking-tighter leading-[1.1]',
+              )}
+              lang={isHi ? 'hi' : 'en'}
             >
               {t('landing.hero.titleLine1')} <br />
-              <span className="gradient-text">{t('landing.hero.titleLine2')}</span>
+              <span className="gradient-text inline-block px-0.5">{t('landing.hero.titleLine2')}</span>
             </motion.h1>
 
             <motion.p 
@@ -536,7 +549,7 @@ const Landing = () => {
                 className="w-10 h-10 object-contain"
                 referrerPolicy="no-referrer"
               />
-              <span className="text-2xl font-bold text-white">SheShark</span>
+              <span className="text-2xl font-bold text-white">{t('nav.brandWordmark')}</span>
             </div>
             <p className="text-white/40 text-sm leading-relaxed">
               {t('landing.footer.blurb')}

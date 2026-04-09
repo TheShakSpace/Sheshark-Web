@@ -15,6 +15,8 @@ export const langNavAppHi = {
     login: 'लॉग इन',
     joinNow: 'अभी जुड़ें',
     brandAlt: 'SheShark लोगो',
+    /** देवनागरी में ब्रांड नाम */
+    brandWordmark: 'शीशार्क',
     profileAlt: 'प्रोफ़ाइल',
   },
   appShell: {

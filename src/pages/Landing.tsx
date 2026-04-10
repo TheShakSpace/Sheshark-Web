@@ -30,7 +30,7 @@ const Landing = () => {
   return (
     <div className="relative overflow-x-hidden overflow-y-visible">
       {/* 1. Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-32 pb-20 px-6">
+      <section className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center pt-28 pb-16 px-4 sm:pt-32 sm:pb-20 sm:px-6">
         <div className="max-w-7xl mx-auto w-full relative z-10">
           <div
             className={cn(
@@ -75,12 +75,12 @@ const Landing = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="flex flex-wrap items-center justify-center gap-4"
+              className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
             >
-              <Button onClick={() => navigate('/login')} className="text-lg px-12 py-5 shadow-2xl shadow-primary/40">
+              <Button onClick={() => navigate('/login')} className="w-full justify-center text-base sm:text-lg px-8 py-4 sm:w-auto sm:px-12 sm:py-5 shadow-2xl shadow-primary/40">
                 {t('landing.hero.getStarted')} <ArrowRight size={20} />
               </Button>
-              <a href="/Sheshark.apk" download className="glass px-12 py-5 rounded-full font-bold text-primary hover:bg-primary/5 transition-all flex items-center gap-2">
+              <a href="/Sheshark.apk" download className="glass w-full justify-center px-8 py-4 sm:w-auto sm:px-12 sm:py-5 rounded-full font-bold text-primary hover:bg-primary/5 transition-all flex items-center gap-2">
                 {t('landing.hero.downloadApp')} <Download size={20} />
               </a>
             </motion.div>
@@ -159,10 +159,10 @@ const Landing = () => {
       </section>
 
       {/* 2. Features Grid */}
-      <section id="features" className="py-24 px-6 bg-slate-50/50">
+      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50/50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">{t('landing.features.title')}</h2>
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t('landing.features.title')}</h2>
             <p className="text-slate-500 max-w-2xl mx-auto">{t('landing.features.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -196,11 +196,11 @@ const Landing = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="mt-16 glass p-10 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-12 bg-gradient-to-br from-primary/5 to-transparent border-primary/20"
+            className="mt-10 sm:mt-16 glass p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-8 sm:gap-12 bg-gradient-to-br from-primary/5 to-transparent border-primary/20"
           >
             <div className="max-w-xl text-center md:text-left">
-              <h3 className="text-3xl font-bold mb-4">{t('landing.appQr.title')}</h3>
-              <p className="text-slate-600 text-lg mb-6">
+              <h3 className="text-2xl sm:text-3xl font-bold mb-4">{t('landing.appQr.title')}</h3>
+              <p className="text-slate-600 text-base sm:text-lg mb-6">
                 {t('landing.appQr.body')}
               </p>
               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
@@ -230,9 +230,9 @@ const Landing = () => {
       </section>
 
       {/* 3. Stats Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-7xl mx-auto glass rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
-          <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-12">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto glass rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-12 md:p-20 text-center relative overflow-hidden">
+          <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 md:gap-12">
             {[
               { label: t('landing.stats.activeUsers'), value: "50K+" },
               { label: t('landing.stats.energySaved'), value: "1.2MW" },
@@ -240,8 +240,8 @@ const Landing = () => {
               { label: t('landing.stats.safetySos'), value: "24/7" },
             ].map((s, i) => (
               <div key={i}>
-                <div className="text-4xl md:text-5xl font-bold gradient-text mb-2">{s.value}</div>
-                <div className="text-slate-500 font-medium">{s.label}</div>
+                <div className="text-2xl sm:text-4xl md:text-5xl font-bold gradient-text mb-2 break-words">{s.value}</div>
+                <div className="text-slate-500 font-medium text-xs sm:text-sm md:text-base leading-snug">{s.label}</div>
               </div>
             ))}
           </div>
@@ -249,7 +249,7 @@ const Landing = () => {
       </section>
 
       {/* 4. About SheShark (Mission) */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -297,7 +297,7 @@ const Landing = () => {
       </section>
 
       {/* 5. How It Works */}
-      <section className="py-24 px-6 bg-slate-50/50">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50/50">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-16">{t('landing.journey.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -319,8 +319,8 @@ const Landing = () => {
       </section>
 
       {/* 6. AI Tools Showcase */}
-      <section className="py-24 px-6">
-        <div className="max-w-7xl mx-auto glass rounded-[3rem] p-12 md:p-20 bg-gradient-to-br from-primary/5 to-transparent">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto glass rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-12 md:p-20 bg-gradient-to-br from-primary/5 to-transparent">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-primary/30">
@@ -330,13 +330,13 @@ const Landing = () => {
               <p className="text-lg text-slate-600 mb-8 leading-relaxed">
                 {t('landing.aiShowcase.body')}
               </p>
-              <div className="flex gap-4">
-                <Button onClick={() => navigate('/ai')}>{t('landing.aiShowcase.tryAdvisor')}</Button>
-                <Button variant="secondary">{t('landing.aiShowcase.watchDemo')}</Button>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Button onClick={() => navigate('/ai')} className="w-full justify-center sm:w-auto">{t('landing.aiShowcase.tryAdvisor')}</Button>
+                <Button variant="secondary" className="w-full justify-center sm:w-auto">{t('landing.aiShowcase.watchDemo')}</Button>
               </div>
             </div>
             <div className="space-y-6">
-              <GlassCard className="translate-x-4">
+              <GlassCard className="translate-x-0 sm:translate-x-4">
                 <div className="flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
                     <Star size={20} />
@@ -347,7 +347,7 @@ const Landing = () => {
                   </div>
                 </div>
               </GlassCard>
-              <GlassCard className="-translate-x-4">
+              <GlassCard className="translate-x-0 sm:-translate-x-4">
                 <div className="flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-pink-400 flex items-center justify-center text-white shrink-0">
                     <Heart size={20} />
@@ -364,7 +364,7 @@ const Landing = () => {
       </section>
 
       {/* 7. Energy Hub Preview */}
-      <section className="py-24 px-6 bg-slate-900 text-white overflow-hidden relative">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-900 text-white overflow-hidden relative">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -399,7 +399,7 @@ const Landing = () => {
                   ))}
                 </div>
               </div>
-              <div className="mt-6 flex justify-between text-white/40 text-xs font-bold uppercase tracking-widest">
+              <div className="mt-6 flex justify-between gap-1 overflow-x-auto pb-1 text-white/40 text-[10px] font-bold uppercase tracking-tight sm:tracking-widest sm:text-xs [-webkit-overflow-scrolling:touch]">
                 <span>{t('months.Mon')}</span><span>{t('months.Tue')}</span><span>{t('months.Wed')}</span><span>{t('months.Thu')}</span><span>{t('months.Fri')}</span><span>{t('months.Sat')}</span><span>{t('months.Sun')}</span>
               </div>
             </div>
@@ -409,7 +409,7 @@ const Landing = () => {
       </section>
 
       {/* 8. Marketplace Preview */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">{t('landing.marketplacePreview.title')} <span className="text-primary">{t('landing.marketplacePreview.titleHighlight')}</span></h2>
           <p className="text-slate-500">{t('landing.marketplacePreview.subtitle')}</p>
@@ -443,7 +443,7 @@ const Landing = () => {
       </section>
 
       {/* 9. Community Preview */}
-      <section className="py-24 px-6 bg-primary/5">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-primary/5">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="order-2 lg:order-1 grid grid-cols-2 gap-4">
             <div className="space-y-4">
@@ -468,8 +468,8 @@ const Landing = () => {
             <p className="text-lg text-slate-600 mb-8 leading-relaxed">
               {t('landing.community.body')}
             </p>
-            <div className="flex items-center gap-4 mb-8">
-              <div className="flex -space-x-4">
+            <div className="flex flex-wrap items-center gap-4 mb-8">
+              <div className="flex -space-x-4 shrink-0">
                 {[1, 2, 3, 4, 5].map(i => (
                   <img key={i} src={`https://ui-avatars.com/api/?name=User+${i}&background=random`} className="w-12 h-12 rounded-full border-4 border-white" alt="" />
                 ))}
@@ -482,7 +482,7 @@ const Landing = () => {
       </section>
 
       {/* 10. Testimonials */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">{t('landing.testimonials.title')} <span className="text-primary">{t('landing.testimonials.titleHighlight')}</span></h2>
           <p className="text-slate-500">{t('landing.testimonials.subtitle')}</p>
@@ -515,7 +515,7 @@ const Landing = () => {
       </section>
 
       {/* 11. FAQ */}
-      <section className="py-24 px-6 bg-slate-50/50">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50/50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">{t('landing.faq.title')}</h2>
@@ -539,7 +539,7 @@ const Landing = () => {
       </section>
 
       {/* 12. Footer */}
-      <footer className="py-20 px-6 bg-slate-900 text-white">
+      <footer className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">
             <div className="flex items-center gap-2">
@@ -581,9 +581,9 @@ const Landing = () => {
             </a>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-xs font-medium">
+        <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-xs font-medium text-center md:text-left">
           <div>{t('landing.footer.rights')}</div>
-          <div className="flex gap-8">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 md:justify-end md:gap-8">
             <a href="#" className="hover:text-white transition-colors">{t('landing.footer.privacy')}</a>
             <a href="#" className="hover:text-white transition-colors">{t('landing.footer.terms')}</a>
             <a href="#" className="hover:text-white transition-colors">{t('landing.footer.cookies')}</a>

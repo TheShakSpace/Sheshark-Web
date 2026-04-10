@@ -422,18 +422,18 @@ const Login = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   type="button"
                   variant="secondary"
                   loading={otpSending}
                   disabled={!contactValid}
-                  className="flex-1 py-3"
+                  className="w-full flex-1 py-3 sm:w-auto"
                   onClick={sendOtp}
                 >
                   {t('login.sendOtp')}
                 </Button>
-                <Button type="submit" loading={loading} className="flex-[1.4] py-3">
+                <Button type="submit" loading={loading} className="w-full flex-[1.4] py-3 sm:w-auto">
                   {t('login.signUpOtp')} <ArrowRight size={18} />
                 </Button>
               </div>

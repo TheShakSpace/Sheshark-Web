@@ -95,7 +95,7 @@ const LearningCourse = () => {
             loading="eager"
             decoding="async"
           />
-          <div className="p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             <div className="text-xs font-bold text-primary uppercase tracking-wide">{course.category}</div>
             <h1 className="text-3xl font-bold mt-2 leading-tight">{course.title}</h1>
             <p className="text-slate-600 mt-4 leading-relaxed">{course.description}</p>

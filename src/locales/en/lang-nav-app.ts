@@ -21,6 +21,10 @@ export const langNavAppEn = {
   },
   appShell: {
     logout: 'Logout',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
+    collapseSidebar: 'Collapse sidebar',
+    expandSidebar: 'Expand sidebar',
     menu: {
       dashboard: 'Dashboard',
       energyHub: 'Energy Hub',

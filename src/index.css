@@ -17,8 +17,16 @@
 }
 
 @layer base {
+  html {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-white text-foreground font-sans antialiased;
+    overflow-x: clip;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
 

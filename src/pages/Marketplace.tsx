@@ -50,7 +50,7 @@ const Marketplace = () => {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t("marketplace.searchPlaceholder")}
-              className="glass pl-12 pr-6 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 max-w-full"
+              className="glass pl-12 pr-6 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 w-full min-w-0 sm:w-64"
             />
           </div>
         </div>

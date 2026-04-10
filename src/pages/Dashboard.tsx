@@ -111,7 +111,7 @@ const Dashboard = () => {
             <input
               type="search"
               placeholder={t("dashboard.searchPlaceholder")}
-              className="glass pl-12 pr-6 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 max-w-full"
+              className="glass w-full max-w-full rounded-2xl py-3 pl-12 pr-6 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-64"
             />
           </div>
           <button type="button" className="glass p-3 rounded-2xl text-slate-600 hover:text-primary relative">

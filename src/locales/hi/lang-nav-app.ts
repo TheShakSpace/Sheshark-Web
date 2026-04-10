@@ -21,6 +21,10 @@ export const langNavAppHi = {
   },
   appShell: {
     logout: 'लॉग आउट',
+    openMenu: 'मेनू खोलें',
+    closeMenu: 'मेनू बंद करें',
+    collapseSidebar: 'साइडबार संकुचित करें',
+    expandSidebar: 'साइडबार खोलें',
     menu: {
       dashboard: 'डैशबोर्ड',
       energyHub: 'एनर्जी हब',
